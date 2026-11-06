@@ -1,28 +1,23 @@
-
+import allure
 import pytest
-from selenium import webdriver
+
+from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
-from pathlib import Path
-
-SCREENSHOT_DIR = Path(__file__).resolve().parents[1] / "screenshots"
-SCREENSHOT_DIR.mkdir(exist_ok=True)
-
-@pytest.fixture
-def driver():
-    driver = webdriver.Chrome()
-    driver.maximize_window()
-    driver.get("https://www.saucedemo.com/")
-
-    yield driver
-
-    driver.quit()
+from utils import take_screenshot
 
 
+@pytest.mark.ui
+@allure.feature("Login")
+@allure.title("Login berhasil dengan standard_user")
 def test_login_success(driver):
     login_page = LoginPage(driver)
+    inventory_page = InventoryPage(driver)
 
-    login_page.login("standard_user", "secret_sauce")
-    driver.save_screenshot(
-    str(SCREENSHOT_DIR / "positive_login_success.png")
-)
-    assert "inventory.html" in driver.current_url
+    with allure.step("Login dengan kredensial valid"):
+        login_page.login("standard_user", "secret_sauce")
+
+    with allure.step("Verifikasi masuk ke halaman produk"):
+        # get_title menunggu halaman produk benar-benar termuat
+        assert inventory_page.get_title() == "Products"
+        assert "inventory.html" in driver.current_url
+        take_screenshot(driver, "positive_login_success")

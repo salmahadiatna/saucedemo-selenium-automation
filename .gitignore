@@ -11,3 +11,6 @@ __pycache__/
 # Allure results
 allure-results/
 allure-report/
+
+#screenshots
+screenshots/
