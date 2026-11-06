@@ -2,6 +2,8 @@
 
 ![Tests](https://github.com/salmahadiatna/saucedemo-selenium-automation/actions/workflows/tests.yml/badge.svg)
 
+[Lihat laporan Allure](https://salmahadiatna.github.io/saucedemo-selenium-automation/)
+
 Project web automation testing untuk [SauceDemo](https://www.saucedemo.com/)
 menggunakan Selenium WebDriver, Python, dan pytest, dengan pola
 Page Object Model (POM) dan laporan Allure.
