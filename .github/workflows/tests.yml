@@ -7,6 +7,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Satu deploy Pages dalam satu waktu
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -31,6 +41,20 @@ jobs:
           HEADLESS: "1"
         run: python -m pytest -v
 
+      # Allure CLI butuh Java
+      - name: Setup Java
+        if: always()
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,3 +70,22 @@ jobs:
           name: screenshots
           path: screenshots
           if-no-files-found: ignore
+
+      # Pages hanya dideploy dari push ke main, bukan dari pull request
+      - name: Upload report for Pages
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+
+  deploy-report:
+    needs: test
+    if: always() && github.event_name != 'pull_request' && needs.test.result != 'cancelled'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
