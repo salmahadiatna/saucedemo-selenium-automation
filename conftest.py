@@ -4,6 +4,8 @@ import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
 from utils import take_screenshot
 
 BASE_URL = "https://www.saucedemo.com/"
@@ -64,3 +66,24 @@ def driver(request):
 @pytest.fixture
 def setup_browser(driver):
     return driver
+
+
+# ==========================================
+# FIXTURE: sudah login
+# ==========================================
+
+def _login(driver, username):
+    LoginPage(driver).login(username, "secret_sauce")
+    # get_title menunggu halaman produk benar-benar termuat
+    assert InventoryPage(driver).get_title() == "Products"
+    return driver
+
+
+@pytest.fixture
+def logged_in(driver):
+    return _login(driver, "standard_user")
+
+
+@pytest.fixture
+def logged_in_problem_user(driver):
+    return _login(driver, "problem_user")
