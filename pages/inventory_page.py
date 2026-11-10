@@ -1,9 +1,9 @@
 import allure
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
 from pages.base_page import BasePage
 
 
@@ -30,26 +30,28 @@ class InventoryPage(BasePage):
     # ---------- daftar produk ----------
 
     def get_item_names(self):
-        return [e.text for e in self.find_all(self.ITEM_NAMES)]
+        return self.texts_of(self.ITEM_NAMES)
 
     def get_item_prices(self):
-        return [parse_price(e.text) for e in self.find_all(self.ITEM_PRICES)]
+        return [parse_price(text) for text in self.texts_of(self.ITEM_PRICES)]
 
     def get_item_image_sources(self):
-        return [e.get_attribute("src") for e in self.find_all(self.ITEM_IMAGES)]
+        return self.attributes_of(self.ITEM_IMAGES, "src")
 
     @allure.step("Urutkan produk: {option_value}")
     def sort_by(self, option_value):
         """option_value: az, za, lohi, atau hilo."""
-        Select(self.find(self.SORT_DROPDOWN)).select_by_value(option_value)
+        self._retry(
+            lambda: Select(self.find(self.SORT_DROPDOWN)).select_by_value(option_value)
+        )
 
     # ---------- keranjang ----------
 
     @allure.step("Tambah produk pertama ke keranjang")
     def add_first_item_to_cart(self):
         """Return nama produk yang ditambahkan, untuk diverifikasi di keranjang."""
-        item_name = self.find_all(self.ITEM_NAMES)[0].text
-        self.find_all(self.ADD_TO_CART_BUTTONS)[0].click()
+        item_name = self.texts_of(self.ITEM_NAMES)[0]
+        self.click_nth(self.ADD_TO_CART_BUTTONS, 0)
         return item_name
 
     @allure.step("Tambah {count} produk pertama ke keranjang")
@@ -57,9 +59,8 @@ class InventoryPage(BasePage):
         """Return list (nama, harga) produk yang ditambahkan."""
         names = self.get_item_names()[:count]
         prices = self.get_item_prices()[:count]
-        buttons = self.find_all(self.ADD_TO_CART_BUTTONS)
-        for button in buttons[:count]:
-            button.click()
+        for index in range(count):
+            self.click_nth(self.ADD_TO_CART_BUTTONS, index)
         return list(zip(names, prices))
 
     def get_cart_badge_count(self):

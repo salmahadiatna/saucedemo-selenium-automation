@@ -12,7 +12,7 @@ class CartPage(BasePage):
     CHECKOUT_BUTTON = (By.ID, "checkout")
 
     def get_item_names(self):
-        return [element.text for element in self.find_all(self.ITEM_NAMES)]
+        return self.texts_of(self.ITEM_NAMES)
 
     def wait_for_item_count(self, expected):
         """True jika jumlah item di keranjang menjadi `expected` (boleh 0)."""
@@ -26,7 +26,7 @@ class CartPage(BasePage):
 
     @allure.step("Hapus item pertama dari keranjang")
     def remove_first_item(self):
-        self.find_all(self.REMOVE_BUTTONS)[0].click()
+        self.click_nth(self.REMOVE_BUTTONS, 0)
 
     @allure.step("Lanjut ke checkout")
     def proceed_to_checkout(self):

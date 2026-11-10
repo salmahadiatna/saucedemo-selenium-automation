@@ -39,9 +39,9 @@ class CheckoutPage(BasePage):
     def get_shipping_field_values(self):
         """Isi field saat ini, untuk memverifikasi input tersimpan dengan benar."""
         return {
-            "first_name": self.find(self.FIRST_NAME).get_attribute("value"),
-            "last_name": self.find(self.LAST_NAME).get_attribute("value"),
-            "postal_code": self.find(self.POSTAL_CODE).get_attribute("value"),
+            "first_name": self.attribute_of(self.FIRST_NAME, "value"),
+            "last_name": self.attribute_of(self.LAST_NAME, "value"),
+            "postal_code": self.attribute_of(self.POSTAL_CODE, "value"),
         }
 
     @allure.step("Isi informasi pengiriman")
@@ -52,7 +52,7 @@ class CheckoutPage(BasePage):
     # ---------- ringkasan pesanan ----------
 
     def get_summary_item_prices(self):
-        return [amount_from(e.text) for e in self.find_all(self.SUMMARY_ITEM_PRICES)]
+        return [amount_from(t) for t in self.texts_of(self.SUMMARY_ITEM_PRICES)]
 
     def get_subtotal(self):
         return amount_from(self.text_of(self.SUBTOTAL_LABEL))
