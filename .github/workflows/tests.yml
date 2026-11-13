@@ -36,10 +36,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests (headless)
+      # API dulu: cepat dan tidak butuh browser
+      - name: Run API tests
+        run: python -m pytest -m api
+
+      # if: always() agar test UI tetap jalan walaupun test API gagal
+      - name: Run UI tests (headless)
+        if: always()
         env:
           HEADLESS: "1"
-        run: python -m pytest -v
+        run: python -m pytest -m ui -rxX
 
       # Allure CLI butuh Java
       - name: Setup Java
